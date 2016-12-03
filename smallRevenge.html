@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title> Revenge!</title>
+  
+ <style>
+ 
+ body { 
+ 	background-color: #B23BA4;
+	background-repeat: no-repeat;
+ 	background-position: right top;
+ 	}
+ 	
+ img {
+ background-color: yellow;
+ height: 60px;
+ width: 60px;
+ postion: absolute;
+ }
+ 	
+ #dodger {
+  background-color: #B23BA4;
+  background-image: url('dodger.jpg')
+  height: 60px;
+  position: absolute;
+  width: 100px;
+}
+
+#game {
+  background-color: #B23BA4;
+  background-image: url("https://www.newton.ac.uk/files/covers/968361.jpg");
+  height: 575px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  width: 700px;
+}
+
+#scoreboard{
+background-color:  blue;
+height: 100px;
+width: 350px;
+margin: 0 auto;
+position: relative; 
+text-align: left;
+font-family: "Comic Sans MS";
+font-size: 4rem;
+}
+
+
+#start {
+  color: white;
+  font-size: 2rem;
+  position: relative;
+  text-decoration: none;
+  top: 4rem;
+}
+
+.rock {
+  width: 40px;
+  height: 30px;
+  background: none;
+  position: absolute;
+}
+
+
+  
+.laser {
+width: 5px;
+height: 45px;
+background: white;
+position: absolute;
+}
+
+</style>
+ 
+  </head>
+
+  <body>
+  
+  <audio id="sound" src="laser.wav" type="audio/wav">
+  </audio>
+  <audio src="Success!.mp3" type="audio/mpeg">
+  </audio>
+  <audio src="Boo.mp3" type="audio/mpeg">
+  </audio>
+    <div id="game">
+
+      <a id="start" href="javascript:start()">Hit ENTER (maybe twice) to start a new game...............                              
+      use left and right arrow keys to move and avoid the falling rocks!
+      Use the up-arrow key to shoot the rocks and earn points! </a>
+      <div id="dodger" style="bottom: 0px; left: 315px;"></div>
+    </div>
+    <div id="scoreboard">Score = 0</div>
+    <script>
+const DODGER = document.getElementById('dodger')
+const GAME = document.getElementById('game')
+const GAME_WIDTH = 700
+const LEFT_ARROW = 37
+const RIGHT_ARROW = 39
+const UP_ARROW = 38
+const ROCKS = []
+const LASERS = []
+const START = document.getElementById('start')
+const PLAY_AGAIN = document.getElementById('playAgain')
+var gameInterval = null
+var score = 0
+var count = 0
+var done = false
+window.addEventListener('keydown',startUp)
+function startUp(e){
+if(e.which == 13){
+start()
+}
+}
+
+function createLaser() {
+//debugger
+ 	const laser = document.createElement('div')
+  	laser.className = 'laser'
+  	var laserNumbers = dodger.style.left.replace('px', '')
+  	var laserPos = parseInt(laserNumbers, 10) + 50
+  	
+  	laser.style.left = `${laserPos}px`
+  	var top = 480
+  	laser.style.top = `${top}px`
+	GAME.appendChild(laser)
+	var sound=document.getElementsByTagName("audio")[0];
+	sound.play();
+	
+ 
+    
+     function  moveLaser(){
+     		function step(){		
+     			laser.style.top = `${top-= 10}px`
+     			topNow=positionToInteger(laser.style.top)  
+			 	
+			 	if (checkDestroy(laser)){
+			 	laser.remove()
+			 	ROCKS[checkDestroy(laser)].remove()
+			 	return
+			 	}
+			 	
+			     		
+   	  			else if (topNow >3){
+   	  				window.requestAnimationFrame(step)
+   	  	 		}
+   	  	 		else {
+   	  	 			laser.style.top=`1000px`
+   	  	 			laser.remove()
+   	  	 			return
+   	  	 		}
+   	  		}
+   	  	
+   	  	     
+   	  	   window.requestAnimationFrame(step)
+	 }
+	moveLaser()
+	LASERS.push(laser)
+	return laser
+	}
+
+
+function rockDestroy(rock){
+	const bottom = positionToInteger((rock.style.top))-20
+	lasNum = LASERS.length
+	for (L=0;L<lasNum;L++){
+		for (i=0, l=LASERS.length;i<l;i++){
+			const lasTop = positionToInteger(LASERS[i].style.top)
+			if (
+				((bottom >= lasTop) && (
+				(positionToInteger(LASERS[i].style.left)>=positionToInteger(rock.style.left)) && 
+				(positionToInteger(LASERS[i].style.left) <=positionToInteger(rock.style.left + 40))
+				)) 
+				|| ((bottom >= lasTop) && (
+				(positionToInteger(LASERS[i].style.left) + 5 <= positionToInteger(rock.style.left) + 40) && 
+		
+				(positionToInteger(LASERS[i].style.left)+ 5 >=positionToInteger(rock.style.left))
+				)
+				)
+				)
+		
+			{	var sound=document.getElementsByTagName("audio")[1];
+				sound.play();
+				return true
+			}
+		}
+  	}
+}
+
+	
+
+
+
+function checkDestroy(laser){
+//debugger
+	const top = positionToInteger(laser.style.top)
+	rockNum = ROCKS.length
+	for (r=0;r<rockNum;r++){
+		for (i=0, l=ROCKS.length;i<l;i++){
+			const rockBottom = positionToInteger(ROCKS[i].style.top) + 20
+			if (
+				((top <= rockBottom) && (
+				(positionToInteger(laser.style.left)>=positionToInteger(ROCKS[i].style.left)) && 
+				(positionToInteger(laser.style.left) <=positionToInteger(ROCKS[i].style.left + 40))
+				)) 
+				|| ((top <= rockBottom) && (
+				(positionToInteger(laser.style.left) + 5 <= positionToInteger(ROCKS[i].style.left) + 40) && 
+		
+				(positionToInteger(laser.style.left)+ 5 >=positionToInteger(ROCKS[i].style.left))
+				)
+				)
+				)
+		
+			{	
+				count+=1
+				laser.remove()
+				return i
+			}
+			else
+			{
+			return false
+			}
+		}
+  	}
+}
+
+
+function createRock(x) {
+ 	const rock = document.createElement('div')
+  	rock.className = 'rock'
+  	rock.style.left = `${x}px`
+  	var top = 0
+  	rock.style.top = top
+	GAME.appendChild(rock)
+	  	var allRocks=document.getElementsByClassName("rock")
+		for (var i=0;i<allRocks.length;i++){
+		allRocks[i].innerHTML="<img src='target.jpg' style= 'width: 40px' />";
+		
+		}
+    
+     function  moveRock(){
+     		function step(){
+     		if (done){
+     		return}
+     		rock.style.top = `${top+= 3}px`
+     		topNow=positionToInteger(rock.style.top)
+     		if (rockDestroy(rock)){
+     		rock.remove()
+     		score+=1
+     		document.getElementById("scoreboard").innerHTML=("Score= "+score);
+     		  return
+     		 }
+     		if(checkCollision(rock)){
+     		var sound=document.getElementsByTagName("audio")[2];
+				sound.play();
+				endGame(score)
+			}
+   	  	 	else if (topNow <545){
+   	  	 	window.requestAnimationFrame(step)
+   	  	 	}
+   	  	 	else {
+   	  	 	rock.remove()
+   	  	 }
+   	  	}
+   	  	     window.requestAnimationFrame(step)
+	} 
+	moveRock()
+	ROCKS.push(rock)
+	return rock
+}
+
+function checkCollision(rock) {
+  const top = positionToInteger(rock.style.top)
+  if (top > 455) {
+    const dodgerLeftEdge = positionToInteger(DODGER.style.left)
+    const dodgerRightEdge = dodgerLeftEdge + 100;
+    const rockLeftEdge = positionToInteger(rock.style.left)
+    const rockRightEdge = rockLeftEdge + 40;
+    if
+	(((rockRightEdge  >= dodgerLeftEdge) && (rockRightEdge <= dodgerRightEdge)) ||
+	((rockLeftEdge >= dodgerLeftEdge) && (rockLeftEdge <= dodgerRightEdge))) {
+      return true
+    }
+  }
+}
+
+
+
+function gameActions(e) {
+	if (e.which==UP_ARROW){
+	createLaser()
+	}
+	else{
+    window.addEventListener('keyup', stopMove);
+	move = true
+	if(e.which===LEFT_ARROW){
+		moveDodgerLeft()
+	}  
+	if(e.which===RIGHT_ARROW){
+		moveDodgerRight()
+		}
+	}
+}
+
+	function stopMove(e){
+	if(e.which==37||e.which==39){
+		move=false
+		window.removeEventListener('keyup',stopMove)
+	}
+}
+
+function moveDodgerLeft() {
+  function step(){
+  if (move==true){
+  	var leftNumbers = dodger.style.left.replace('px', '')
+  	var left = parseInt(leftNumbers, 10)
+  		  if (left > 0){
+  			dodger.style.left = `${left - 1}px`;
+  			window.requestAnimationFrame(step)
+  		}
+	 }
+	 }
+	 window.requestAnimationFrame(step)
+}
+
+function moveDodgerRight() {
+  function step(){
+  if(move==true){
+  	var rightNumbers = dodger.style.left.replace('px', '')
+  	var right = parseInt(rightNumbers, 10)
+  		  if (right < 900){
+  			dodger.style.left = `${right + 1}px`;
+  			 window.requestAnimationFrame(step)
+  		}
+  	   }
+	 }
+	 window.requestAnimationFrame(step)
+}
+
+function endGame(score) {
+clearInterval(gameInterval)
+var finalRocks=document.getElementsByClassName("rock")
+while(finalRocks.length > 0){
+	finalRocks[0].remove()
+	}
+window.removeEventListener('keydown',gameActions)
+alert(`Final Score = ${score}!`)
+done = true
+START.style.display='inline'
+window.addEventListener('keydown',playAgain)
+
+}
+
+function positionToInteger(p) {
+  return parseInt(p.split('px')[0]) || 0
+}
+
+function start() {
+DODGER.innerHTML="<img src='dodger.jpg'/>"
+window.removeEventListener('keydown',startUp)
+done = false
+score = 0
+  window.addEventListener('keydown', gameActions)
+  START.style.display = 'none'
+  gameInterval = setInterval(function() {
+    createRock(Math.floor(Math.random() *  (GAME_WIDTH - 50)))
+  }, 750)
+}
+
+function playAgain(e){
+if (e.which===13){
+location.reload(true)
+}
+}
+ </script>
+  </body>
+</html>
+
+
+
